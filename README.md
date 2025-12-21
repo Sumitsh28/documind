@@ -1,36 +1,44 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# 🧠 DocuMind
 
-## Getting Started
+> **A production-grade Retrieval-Augmented Generation (RAG) platform.** > _Upload a PDF. Index it instantly. Chat with it intelligently._
 
-First, run the development server:
+DocuMind is a Full-Stack Next.js application that allows users to interact with their documents using natural language. It leverages vector embeddings, semantic search, and streaming AI responses to provide accurate, context-aware answers.
+
+![License](https://img.shields.io/badge/License-MIT-blue.svg)
+![TypeScript](https://img.shields.io/badge/TypeScript-5.0-blue)
+![Next.js](https://img.shields.io/badge/Next.js-14-black)
+![Supabase](https://img.shields.io/badge/Supabase-pgvector-green)
+
+---
+
+## ✨ Key Features
+
+- **⚡ Real-Time Streaming:** Zero-latency responses using the Vercel AI SDK (3.3+).
+- **🔍 Semantic Search:** Uses OpenAI Embeddings (`text-embedding-3-small`) and Supabase `pgvector` to understand intent, not just keywords.
+- **🎙️ Voice Interface:** Integrated Web Speech API for seamless voice-to-text interaction.
+- **📝 Rich Text Rendering:** Markdown support for bolding, lists, and formatted code blocks.
+- **🧠 Context-Aware:** Smart suggestion pills and follow-up prompts based on conversation history.
+- **🎨 Glassmorphism UI:** A polished, fully responsive interface with smooth transitions and loading states.
+- **🛡️ Data Integrity:** Strict parsing using `pdf2json` to handle complex PDF structures server-side.
+
+---
+
+## 🛠️ Tech Stack
+
+- **Frontend:** Next.js 14 (App Router), React, Tailwind CSS, Lucide Icons, Framer Motion (animations via clsx/tailwind).
+- **Backend:** Next.js API Routes (Edge/Node runtimes).
+- **AI Orchestration:** Vercel AI SDK (@ai-sdk/react, @ai-sdk/openai), LangChain.
+- **Database:** Supabase (PostgreSQL + pgvector extension).
+- **Vector Store:** OpenAI Embeddings.
+- **Parsing:** pdf2json (Node.js based PDF parsing).
+
+---
+
+## 🚀 Getting Started
+
+### 1. Clone the repository
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+git clone [https://github.com/your-username/documind.git](https://github.com/your-username/documind.git)
+cd documind
 ```
-
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
-
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
-
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
-
-## Learn More
-
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
