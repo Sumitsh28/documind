@@ -4,6 +4,9 @@ import { OpenAIEmbeddings } from "@langchain/openai";
 import { supabaseAdmin } from "@/lib/supabase";
 import PDFParser from "pdf2json";
 
+export const maxDuration = 60;
+export const dynamic = "force-dynamic";
+
 export async function POST(req: NextRequest) {
   try {
     const formData = await req.formData();
@@ -13,52 +16,59 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "No file provided" }, { status: 400 });
     }
 
-    const bytes = await file.arrayBuffer();
-    const buffer = Buffer.from(bytes);
-
+    const buffer = Buffer.from(await file.arrayBuffer());
     const text = await new Promise<string>((resolve, reject) => {
       const pdfParser = new (PDFParser as any)(null, 1);
-
       pdfParser.on("pdfParser_dataError", (errData: any) =>
         reject(errData.parserError)
       );
-
-      pdfParser.on("pdfParser_dataReady", (pdfData: any) => {
-        const rawText = (pdfParser as any).getRawTextContent();
-        resolve(rawText);
+      pdfParser.on("pdfParser_dataReady", () => {
+        resolve((pdfParser as any).getRawTextContent());
       });
-
       pdfParser.parseBuffer(buffer);
     });
 
     const splitter = new RecursiveCharacterTextSplitter({
-      chunkSize: 1000,
+      chunkSize: 1200,
       chunkOverlap: 200,
     });
 
     const output = await splitter.createDocuments([text]);
 
+    const BATCH_SIZE = 10;
     const embeddings = new OpenAIEmbeddings({
       openAIApiKey: process.env.OPENAI_API_KEY,
     });
 
-    const vectors = await Promise.all(
-      output.map(async (chunk) => {
-        const embedding = await embeddings.embedQuery(chunk.pageContent);
+    let processedChunks = 0;
 
-        return {
-          content: chunk.pageContent,
-          embedding,
-          metadata: { filename: file.name },
-        };
-      })
-    );
+    for (let i = 0; i < output.length; i += BATCH_SIZE) {
+      const batch = output.slice(i, i + BATCH_SIZE);
 
-    const { error } = await supabaseAdmin.from("documents").insert(vectors);
+      const batchVectors = await Promise.all(
+        batch.map(async (chunk) => {
+          const embedding = await embeddings.embedQuery(chunk.pageContent);
+          return {
+            content: chunk.pageContent,
+            embedding,
+            metadata: { filename: file.name },
+          };
+        })
+      );
 
-    if (error) throw error;
+      const { error } = await supabaseAdmin
+        .from("documents")
+        .insert(batchVectors);
 
-    return NextResponse.json({ success: true, chunks: vectors.length });
+      if (error) {
+        console.error("Supabase Batch Error:", error);
+        throw error;
+      }
+
+      processedChunks += batchVectors.length;
+    }
+
+    return NextResponse.json({ success: true, chunks: processedChunks });
   } catch (error: any) {
     console.error("Ingestion error:", error);
     return NextResponse.json({ error: error.message }, { status: 500 });
