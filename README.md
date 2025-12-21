@@ -2,6 +2,8 @@
 
 > **A production-grade Retrieval-Augmented Generation (RAG) platform.** > _Upload a PDF. Index it instantly. Chat with it intelligently._
 
+DEMO VIDEO: https://youtu.be/2Xq93-AQp2E
+
 DocuMind is a Full-Stack Next.js application that allows users to interact with their documents using natural language. It leverages vector embeddings, semantic search, and streaming AI responses to provide accurate, context-aware answers.
 
 ![License](https://img.shields.io/badge/License-MIT-blue.svg)
