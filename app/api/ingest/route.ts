@@ -17,14 +17,67 @@ export async function POST(req: NextRequest) {
     }
 
     const buffer = Buffer.from(await file.arrayBuffer());
+
     const text = await new Promise<string>((resolve, reject) => {
       const pdfParser = new (PDFParser as any)(null, 1);
+
       pdfParser.on("pdfParser_dataError", (errData: any) =>
         reject(errData.parserError)
       );
-      pdfParser.on("pdfParser_dataReady", () => {
-        resolve((pdfParser as any).getRawTextContent());
+
+      pdfParser.on("pdfParser_dataReady", (pdfData: any) => {
+        try {
+          if (!pdfData) {
+            reject(new Error("PDF parser returned empty data."));
+            return;
+          }
+
+          const root = pdfData.formImage || pdfData;
+
+          if (!root || !root.Pages) {
+            console.error(
+              "Unexpected PDF JSON structure:",
+              Object.keys(pdfData)
+            );
+            reject(
+              new Error(
+                "Could not find text pages in PDF. Is it an image scan?"
+              )
+            );
+            return;
+          }
+
+          let extractedText = "";
+
+          root.Pages.forEach((page: any, pageIndex: number) => {
+            if (!page.Texts) return;
+
+            page.Texts.forEach((textItem: any) => {
+              if (!textItem.R) return;
+
+              textItem.R.forEach((t: any) => {
+                const str = decodeURIComponent(t.T);
+                extractedText += str + " ";
+              });
+            });
+            extractedText += "\n";
+          });
+
+          if (!extractedText.trim()) {
+            reject(
+              new Error(
+                "PDF text is empty. The document might be a scanned image."
+              )
+            );
+            return;
+          }
+
+          resolve(extractedText);
+        } catch (err) {
+          reject(err);
+        }
       });
+
       pdfParser.parseBuffer(buffer);
     });
 

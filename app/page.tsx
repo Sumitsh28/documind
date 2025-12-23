@@ -46,6 +46,7 @@ export default function Home() {
     setMessages,
   } = useChat({
     api: "/api/chat",
+    body: { filename: processedFile },
     onError: (e) => {
       console.error(e);
       setIngestionStatus("Error generating response.");

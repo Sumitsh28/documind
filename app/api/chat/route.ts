@@ -5,7 +5,7 @@ import { OpenAIEmbeddings } from "@langchain/openai";
 
 export async function POST(req: Request) {
   try {
-    const { messages } = await req.json();
+    const { messages, filename } = await req.json();
     const lastMessage = messages[messages.length - 1];
 
     if (!lastMessage || lastMessage.role !== "user") {
@@ -22,6 +22,7 @@ export async function POST(req: Request) {
       query_embedding: queryEmbedding,
       match_threshold: 0.5,
       match_count: 5,
+      filter: { filename: filename },
     });
 
     const hasContext = searchResults && searchResults.length > 0;
